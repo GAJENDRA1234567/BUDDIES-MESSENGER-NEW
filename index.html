@@ -23,6 +23,7 @@ button,input,textarea{font:inherit}button{cursor:pointer;color:inherit}.app{widt
   <div class="side-head">
    <div class="brand"><strong>✦ BUDDIES MESSENGER</strong><button class="icon-btn" title="Profile" onclick="profileModal()">☻</button></div>
    <input class="search" id="search" placeholder="Search chats..." oninput="renderList()">
+   <div id="accountBar" style="margin-top:9px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;font-size:11px;color:var(--muted)">Not signed in · Sign in for online chat</div>
   </div>
   <div class="tabs">
    <button class="tab active" data-tab="chats" onclick="switchTab('chats')">Chats</button>
@@ -61,9 +62,23 @@ button,input,textarea{font:inherit}button{cursor:pointer;color:inherit}.app{widt
  </main>
 </div>
 <div id="modalRoot"></div>
+<div id="authRoot" class="modal-bg" style="z-index:30">
+ <div class="modal">
+  <h2>✦ BUDDIES MESSENGER</h2>
+  <p class="muted">Sign in or create an account to use online chat.</p>
+  <label>Email address</label><input id="authEmail" type="email" placeholder="you@example.com" autocomplete="email">
+  <label>Password</label><input id="authPassword" type="password" placeholder="At least 6 characters" autocomplete="current-password">
+  <p id="authError" style="color:#ff9a9a;font-size:12px;min-height:18px"></p>
+  <div class="modal-actions" style="justify-content:space-between;flex-wrap:wrap">
+   <button class="secondary" onclick="signUpAccount()">Create account</button>
+   <button class="primary" onclick="signInAccount()">Sign in</button>
+  </div>
+  <p class="muted" style="margin-bottom:0">Use the same account on each device. Never share your password.</p>
+ </div>
+</div>
 <script>
 const KEY='buddies_messenger_v1';
-let data=loadData(),activeId=null,currentTab='chats';
+let data=loadData(),activeId=null,currentTab='chats';window.data=data;
 function loadData(){try{return JSON.parse(localStorage.getItem(KEY))||{profile:{name:'My Profile',about:'Hey there! I am using Buddies Messenger.'},chats:[],statuses:[]}}catch(e){return {profile:{name:'My Profile',about:'Hey there!'},chats:[],statuses:[]}}}
 function save(){localStorage.setItem(KEY,JSON.stringify(data))}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -84,7 +99,7 @@ function renderList(){
 }
 function openChat(id){activeId=id;let c=active();if(!c)return;document.getElementById('welcome').classList.add('hidden');document.getElementById('chatUI').classList.remove('hidden');document.getElementById('chatAvatar').textContent=initials(c.name);document.getElementById('chatAvatar').innerHTML=c.photo?'<img src="'+c.photo+'">':esc(initials(c.name));document.getElementById('chatName').textContent=c.name;document.getElementById('chatStatus').textContent=c.group?'Group · '+(c.members||[]).join(', '):'Personal chat';renderMessages();renderList();hidePanel()}
 function renderMessages(){let c=active(),box=document.getElementById('messages');box.innerHTML='';if(!c)return;if(!c.messages.length){box.innerHTML='<div class="welcome"><div class="big">👋</div><p>No messages yet. Say hello!</p></div>';return}c.messages.forEach(m=>{let b=document.createElement('div');b.className='bubble mine';if(m.kind==='image'){b.innerHTML='<img src="'+m.data+'"><span>'+esc(m.text||'')+'</span>'}else if(m.kind==='file'){b.innerHTML='📎 <a download="'+esc(m.fileName)+'" href="'+m.data+'">'+esc(m.fileName)+'</a>'}else b.textContent=m.text;b.innerHTML+= '<span class="stamp">'+esc(m.time)+' ✓✓</span>';box.append(b)});box.scrollTop=box.scrollHeight}
-function sendMessage(){let input=document.getElementById('messageInput'),v=input.value.trim(),c=active();if(!v||!c)return;c.messages.push({kind:'text',text:v,time:stamp()});c.updated=Date.now();input.value='';save();renderMessages();renderList()}
+function sendMessage(){let input=document.getElementById('messageInput'),v=input.value.trim(),c=active();if(!v||!c)return;input.value='';if(c.online){if(!window.sendOnlineMessage){alert('Online chat abhi connect ho raha hai.');input.value=v;return}window.sendOnlineMessage(v).catch(e=>{alert('Message send nahi hua: '+e.message);input.value=v});return}c.messages.push({kind:'text',text:v,time:stamp()});c.updated=Date.now();save();renderMessages();renderList()}
 function newChat(){modal('New chat','<label>Friend name</label><input id="newName" placeholder="Enter name" maxlength="40">','Create',()=>{let n=document.getElementById('newName').value.trim();if(!n)return;let c={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),name:n,group:false,messages:[],updated:Date.now(),pinned:false,archived:false};data.chats.push(c);save();closeModal();switchTab('chats');openChat(c.id)})}
 function newGroup(){modal('Create group','<label>Group name</label><input id="groupName" placeholder="e.g. College Friends"><label>Members (comma separated)</label><input id="groupMembers" placeholder="Aman, Riya, Rahul">','Create group',()=>{let n=document.getElementById('groupName').value.trim();if(!n)return;let members=document.getElementById('groupMembers').value.split(',').map(x=>x.trim()).filter(Boolean);let c={id:String(Date.now()),name:n,group:true,members,messages:[],updated:Date.now(),pinned:false,archived:false};data.chats.push(c);save();closeModal();switchTab('groups');openChat(c.id)})}
 function attachFile(e){let file=e.target.files[0],c=active();if(!file||!c)return;if(file.size>1500000){alert('Demo version: choose a file smaller than 1.5 MB.');e.target.value='';return}let r=new FileReader();r.onload=()=>{let image=file.type.startsWith('image/');c.messages.push({kind:image?'image':'file',data:r.result,fileName:file.name,text:'',time:stamp()});c.updated=Date.now();save();renderMessages();renderList()};r.readAsDataURL(file);e.target.value=''}
@@ -92,7 +107,7 @@ function emojiPanel(){showPanel('<h3>Choose emoji</h3><div class="emoji-row">'+[
 function insertEmoji(x){let i=document.getElementById('messageInput');i.value+=x;i.focus();hidePanel()}
 function showPanel(html){let p=document.getElementById('floatingPanel');p.innerHTML=html;p.classList.remove('hidden')}
 function hidePanel(){document.getElementById('floatingPanel').classList.add('hidden')}
-function settingsPanel(){showPanel('<h3>Settings</h3><button class="wide" onclick="toggleTheme()">🌗 Switch light / dark theme</button><button class="wide" onclick="profileModal()">☻ Edit profile</button><button class="wide" onclick="exportBackup()">⬇ Export backup</button><button class="wide" onclick="importBackup()">⬆ Import backup</button><p class="muted">Your chats are stored in this browser on this device.</p>')}
+function settingsPanel(){showPanel('<h3>Settings</h3><button class="wide" onclick="createOnlineRoom()">🌐 Create online room</button><button class="wide" onclick="joinOnlineRoom()">🔗 Join with room code</button><button class="wide" onclick="toggleTheme()">🌗 Switch light / dark theme</button><button class="wide" onclick="profileModal()">☻ Edit profile</button><button class="wide" onclick="exportBackup()">⬇ Export backup</button><button class="wide" onclick="importBackup()">⬆ Import backup</button><p class="muted">Online rooms sync through Firebase. Old local chats stay on this device.</p>')}
 function toggleTheme(){document.body.classList.toggle('light');localStorage.setItem('buddies_theme',document.body.classList.contains('light')?'light':'dark')}
 function profileModal(){modal('Your profile','<label>Your name</label><input id="profileName" value="'+esc(data.profile.name)+'"><label>About</label><textarea id="profileAbout">'+esc(data.profile.about)+'</textarea>','Save profile',()=>{data.profile.name=document.getElementById('profileName').value.trim()||'My Profile';data.profile.about=document.getElementById('profileAbout').value;save();closeModal()})}
 function chatOptions(){let c=active();if(!c)return;showPanel('<h3>'+esc(c.name)+'</h3><button class="wide" onclick="renameChat()">✏ Rename chat</button><button class="wide" onclick="togglePin()">📌 '+(c.pinned?'Unpin':'Pin')+' chat</button><button class="wide" onclick="archiveChat()">📦 '+(c.archived?'Unarchive':'Archive')+' chat</button><button class="wide" onclick="clearChat()">🧹 Clear messages</button><button class="wide" onclick="deleteChat()">🗑 Delete chat</button>')}
@@ -102,6 +117,11 @@ function archiveChat(){let c=active();c.archived=!c.archived;save();activeId=nul
 function clearChat(){if(confirm('Delete all messages in this chat?')){active().messages=[];save();renderMessages();renderList()}hidePanel()}
 function deleteChat(){if(confirm('Delete this chat permanently from this browser?')){data.chats=data.chats.filter(c=>c.id!==activeId);activeId=null;save();document.getElementById('chatUI').classList.add('hidden');document.getElementById('welcome').classList.remove('hidden');renderList()}hidePanel()}
 function addStatus(){modal('Add status','<label>What is on your mind?</label><textarea id="statusText" placeholder="Share an update..." maxlength="250"></textarea>','Post status',()=>{let t=document.getElementById('statusText').value.trim();if(!t)return;data.statuses.push({name:data.profile.name,text:t,time:stamp()});save();closeModal();renderList()})}
+function createOnlineRoom(){if(!window.currentFirebaseUser){alert('Pehle email/password se sign in karo.');return}let room=prompt('Online room ka naam likho:','Friends Chat');if(!room||!room.trim())return;window.createFirebaseRoom(room.trim()).then(roomId=>{let c={id:roomId,name:room.trim(),group:true,members:[],messages:[],updated:Date.now(),pinned:false,archived:false,online:true};data.chats=data.chats.filter(x=>x.id!==roomId);data.chats.push(c);save();switchTab('groups');openChat(roomId);alert('Room ban gaya! Room Code: '+roomId+'\nYe code apne dost ko bhejo.');}).catch(e=>alert('Room nahi bana: '+e.message))}
+function joinOnlineRoom(){if(!window.currentFirebaseUser){alert('Pehle sign in karo.');return}let roomId=prompt('Dost se mila Room Code paste karo:');if(!roomId||!roomId.trim())return;roomId=roomId.trim();window.joinFirebaseRoom(roomId).then(()=>{let c=data.chats.find(x=>x.id===roomId);if(!c){c={id:roomId,name:'Online Room '+roomId.slice(0,6),group:true,members:[],messages:[],updated:Date.now(),pinned:false,archived:false,online:true};data.chats.push(c)}else c.online=true;save();switchTab('groups');openChat(roomId)}).catch(e=>alert('Room join nahi hua: '+e.message))}
+function signInAccount(){window.firebaseSignIn?.().catch(e=>document.getElementById('authError').textContent=authErrorText(e))}
+function signUpAccount(){window.firebaseSignUp?.().catch(e=>document.getElementById('authError').textContent=authErrorText(e))}
+function authErrorText(e){return e.code==='auth/invalid-credential'?'Email ya password galat hai.':e.code==='auth/email-already-in-use'?'Is email ka account pehle se bana hai.':e.code==='auth/weak-password'?'Password kam se kam 6 characters ka rakho.':e.message||'Login error'}
 function callDemo(type){alert(type+' call button is a demo only. Real calls need online signaling and a calling server.')}
 function modal(title,body,ok,fn){document.getElementById('modalRoot').innerHTML='<div class="modal-bg" id="modalBg"><div class="modal"><h2>'+title+'</h2>'+body+'<div class="modal-actions"><button class="secondary" onclick="closeModal()">Cancel</button><button class="primary" id="modalOk">'+ok+'</button></div></div></div>';document.getElementById('modalOk').onclick=fn}
 function closeModal(){document.getElementById('modalRoot').innerHTML=''}
@@ -111,5 +131,25 @@ document.addEventListener('click',e=>{let p=document.getElementById('floatingPan
 if(localStorage.getItem('buddies_theme')==='light')document.body.classList.add('light');
 renderList();
 </script>
+
+<script type="module">
+ import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+ import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+ import { getDatabase, ref, set, get, push, onChildAdded, query, limitToLast } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-database.js";
+ const firebaseConfig={apiKey:"AIzaSyC3UygwjDhyt1nGsRzee4qRON9s_0-2zdo",authDomain:"buddies-messenger-new.firebaseapp.com",databaseURL:"https://buddies-messenger-new-default-rtdb.firebaseio.com",projectId:"buddies-messenger-new",storageBucket:"buddies-messenger-new.firebasestorage.app",messagingSenderId:"922466646991",appId:"1:922466646991:web:24902e8bf8e2fd4f4ef0ba",measurementId:"G-S68B28F994"};
+ const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getDatabase(app);
+ window.currentFirebaseUser=null;let activeRoomRef=null,stopRoomListener=null;
+ function authInputs(){return {email:document.getElementById('authEmail').value.trim(),password:document.getElementById('authPassword').value}}
+ window.firebaseSignUp=async()=>{const {email,password}=authInputs();if(!email||password.length<6)throw Error('Valid email aur kam se kam 6-character password daalo.');await createUserWithEmailAndPassword(auth,email,password)};
+ window.firebaseSignIn=async()=>{const {email,password}=authInputs();if(!email||!password)throw Error('Email aur password daalo.');await signInWithEmailAndPassword(auth,email,password)};
+ window.createFirebaseRoom=async name=>{if(!auth.currentUser)throw Error('Sign in required');const roomId=push(ref(db,'rooms')).key;await set(ref(db,'rooms/'+roomId+'/info'),{name,createdBy:auth.currentUser.uid,createdAt:Date.now()});await set(ref(db,'rooms/'+roomId+'/members/'+auth.currentUser.uid),true);return roomId};
+ window.joinFirebaseRoom=async roomId=>{if(!auth.currentUser)throw Error('Sign in required');const snap=await get(ref(db,'rooms/'+roomId+'/info'));if(!snap.exists())throw Error('Room Code nahi mila. Code dobara check karo.');await set(ref(db,'rooms/'+roomId+'/members/'+auth.currentUser.uid),true);return true};
+ window.sendOnlineMessage=async text=>{if(!activeRoomRef||!auth.currentUser)throw Error('Online room select karo');await push(ref(db,activeRoomRef+'/messages'),{text,uid:auth.currentUser.uid,email:auth.currentUser.email||'',time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),createdAt:Date.now()})};
+ function showAccount(user){const bar=document.getElementById('accountBar');if(bar){bar.innerHTML='Signed in: '+(user.email||'account')+' <button class="secondary" style="padding:3px 7px;margin-left:5px" id="signOutBtn">Sign out</button>';document.getElementById('signOutBtn').onclick=()=>signOut(auth)}document.getElementById('authRoot').style.display='none'}
+ onAuthStateChanged(auth,user=>{window.currentFirebaseUser=user;const root=document.getElementById('authRoot'),bar=document.getElementById('accountBar');if(user){showAccount(user)}else{root.style.display='grid';if(bar)bar.textContent='Not signed in · Sign in for online chat';if(stopRoomListener){stopRoomListener();stopRoomListener=null}activeRoomRef=null}});
+ const originalOpenChat=window.openChat;
+ // Classic-script functions are global declarations; wrap the existing openChat to attach realtime listener.
+ window.openChat=(id)=>{originalOpenChat(id);const c=window.data?.chats?.find(x=>x.id===id);if(!c||!c.online||!auth.currentUser)return;if(stopRoomListener){stopRoomListener();stopRoomListener=null}activeRoomRef='rooms/'+id;const msgQuery=query(ref(db,activeRoomRef+'/messages'),limitToLast(300));const seen=new Set();stopRoomListener=onChildAdded(msgQuery,snap=>{const m=snap.val();if(!m||seen.has(snap.key))return;seen.add(snap.key);const box=document.getElementById('messages');if(!box)return;const empty=box.querySelector('.welcome');if(empty)empty.remove();const b=document.createElement('div');b.className='bubble'+(m.uid===auth.currentUser.uid?' mine':'');b.textContent=(m.email?m.email.split('@')[0]+': ':'')+(m.text||'');const stampEl=document.createElement('span');stampEl.className='stamp';stampEl.textContent=m.time||'';b.append(stampEl);box.append(b);box.scrollTop=box.scrollHeight;});};
+ </script>
 </body>
 </html>
