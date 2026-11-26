@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BUDDIES MESSENGER</title>
+<style>
+:root{--bg:#07111f;--panel:rgba(16,31,53,.82);--panel2:rgba(255,255,255,.065);--line:rgba(255,255,255,.12);--text:#edf5ff;--muted:#9aadc7;--accent:#28a8ff;--accent2:#725cff;--green:#42d6a4}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 12% 12%,#123d70 0,transparent 32%),radial-gradient(circle at 90% 85%,#28205f 0,transparent 35%),var(--bg);color:var(--text);font-family:Segoe UI,Arial,sans-serif}
+button,input,textarea{font:inherit}button{cursor:pointer;color:inherit}.app{width:min(1320px,100% - 28px);height:min(850px,calc(100vh - 28px));min-height:560px;margin:14px auto;display:flex;overflow:hidden;border:1px solid var(--line);border-radius:24px;background:var(--panel);backdrop-filter:blur(24px);box-shadow:0 24px 90px #0008}
+.sidebar{width:350px;min-width:290px;border-right:1px solid var(--line);display:flex;flex-direction:column}.side-head{padding:20px 18px 14px}.brand{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}.brand strong{font-size:21px;letter-spacing:.4px;color:#83d7ff}.icon-btn{border:1px solid var(--line);background:var(--panel2);border-radius:12px;width:38px;height:38px;font-size:17px}.icon-btn:hover,.tool:hover{background:#ffffff20}.search{width:100%;padding:12px 14px;border-radius:13px;border:1px solid var(--line);outline:none;background:#06101dcc;color:var(--text)}
+.tabs{display:flex;gap:7px;padding:0 16px 12px}.tab{flex:1;border:1px solid transparent;background:transparent;color:var(--muted);padding:9px 5px;border-radius:11px}.tab.active{background:#168ce52b;border-color:#168ce555;color:#fff}
+.list{overflow:auto;padding:0 9px 14px;flex:1}.person{display:flex;align-items:center;gap:11px;padding:12px 10px;border-radius:14px;cursor:pointer;margin:3px 0}.person:hover,.person.active{background:#ffffff15}.avatar{width:45px;height:45px;flex:none;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#078de8,#765bff);font-weight:700;font-size:17px;overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover}.person-info{min-width:0;flex:1}.person-top{display:flex;justify-content:space-between;gap:8px}.person-name{font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.preview,.muted{color:var(--muted);font-size:12px}.preview{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:5px}.person-time{font-size:10px;color:var(--muted)}.unread{background:var(--green);color:#052016;border-radius:20px;padding:2px 7px;font-size:10px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;position:relative}.welcome{margin:auto;text-align:center;color:var(--muted);padding:25px}.welcome .big{font-size:64px;margin-bottom:12px}.chat-head{height:75px;display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line)}.chat-title{flex:1;min-width:0}.chat-title b{display:block}.chat-title small{color:var(--green)}.head-actions{display:flex;gap:7px}.messages{flex:1;overflow:auto;padding:22px;display:flex;flex-direction:column;gap:11px;background:linear-gradient(#06101b33,#06101b33)}.day{text-align:center;color:var(--muted);font-size:11px;margin:8px}.bubble{max-width:min(75%,520px);padding:10px 13px;border:1px solid var(--line);background:#ffffff12;border-radius:15px 15px 15px 4px;overflow-wrap:anywhere;line-height:1.45;align-self:flex-start}.bubble.mine{align-self:flex-end;background:linear-gradient(135deg,#087ecb,#5548bd);border-color:#ffffff20;border-radius:15px 15px 4px 15px}.bubble img{max-width:240px;max-height:220px;border-radius:10px;display:block}.bubble a{color:#bfe8ff}.bubble .stamp{display:block;text-align:right;color:#d3e4f7aa;font-size:10px;margin-top:5px}.composer{padding:12px 15px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);background:#081526aa}.composer input{flex:1;min-width:0;border:1px solid var(--line);border-radius:25px;padding:13px 16px;background:#ffffff0c;color:var(--text);outline:none}.send{border:0;background:linear-gradient(135deg,#168fe8,#6559df);border-radius:50%;width:44px;height:44px;font-size:18px}.tool{border:1px solid var(--line);background:var(--panel2);border-radius:12px;width:38px;height:38px}.hidden{display:none!important}
+.panel{position:absolute;right:15px;top:82px;z-index:5;width:min(330px,calc(100% - 30px));padding:15px;border:1px solid var(--line);border-radius:17px;background:#102039;box-shadow:0 15px 45px #0009}.panel h3{margin:3px 0 12px}.panel button,.panel input{margin:4px 0}.panel input{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#071321;color:white}.panel .wide{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:#ffffff10;text-align:left}.emoji-row{display:flex;flex-wrap:wrap;gap:6px}.emoji-row button{font-size:21px;background:#ffffff10;border:0;border-radius:8px;padding:5px}.modal-bg{position:fixed;inset:0;background:#0009;display:grid;place-items:center;z-index:20;padding:15px}.modal{width:min(420px,100%);background:#102039;border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 20px 70px #0009}.modal h2{margin:0 0 14px}.modal input,.modal textarea{width:100%;padding:12px;margin:6px 0 12px;border:1px solid var(--line);border-radius:11px;background:#071321;color:white;outline:none}.modal-actions{display:flex;justify-content:flex-end;gap:8px}.primary{background:#168fe8;border:0;border-radius:10px;padding:10px 15px}.secondary{background:#ffffff12;border:1px solid var(--line);border-radius:10px;padding:10px 15px}.status-card{padding:13px;border:1px solid var(--line);border-radius:13px;margin:8px 0;background:#ffffff09}.status-card b{display:block;margin-bottom:5px}.status-dot{display:inline-block;width:9px;height:9px;background:var(--green);border-radius:50%;margin-right:6px}
+.light{--bg:#dce8f5;--panel:rgba(247,251,255,.92);--panel2:rgba(20,60,100,.07);--line:rgba(20,50,80,.15);--text:#14243a;--muted:#60748d}.light .messages{background:#e8f1fa}.light .composer{background:#f3f8ff}.light .panel,.light .modal{background:#f4f8ff}.light .panel input,.light .modal input,.light .modal textarea{background:#fff;color:#14243a}
+@media(max-width:700px){.app{width:100%;height:100dvh;min-height:0;margin:0;border-radius:0}.sidebar{width:105px;min-width:105px}.side-head{padding:13px 8px}.brand{justify-content:center}.brand strong{font-size:11px;text-align:center}.brand .icon-btn{display:none}.search{font-size:11px;padding:9px 5px}.tabs{padding:0 5px 9px;flex-direction:column}.tab{font-size:11px;padding:7px 2px}.person{justify-content:center;padding:10px 3px}.person-info{display:none}.avatar{width:43px;height:43px}.chat-head{padding:10px}.head-actions{gap:3px}.head-actions .icon-btn{width:32px;height:34px}.messages{padding:13px}.bubble{max-width:88%}.composer{padding:9px 7px;gap:5px}.composer .tool{width:33px;height:35px}.composer input{padding:11px 12px}.send{width:39px;height:39px}}
+</style>
+</head>
+<body>
+<div class="app">
+ <aside class="sidebar">
+  <div class="side-head">
+   <div class="brand"><strong>✦ BUDDIES MESSENGER</strong><button class="icon-btn" title="Profile" onclick="profileModal()">☻</button></div>
+   <input class="search" id="search" placeholder="Search chats..." oninput="renderList()">
+  </div>
+  <div class="tabs">
+   <button class="tab active" data-tab="chats" onclick="switchTab('chats')">Chats</button>
+   <button class="tab" data-tab="groups" onclick="switchTab('groups')">Groups</button>
+   <button class="tab" data-tab="status" onclick="switchTab('status')">Status</button>
+  </div>
+  <div class="list" id="list"></div>
+  <div style="padding:10px;border-top:1px solid var(--line);display:flex;gap:7px">
+   <button class="tool" title="New chat" onclick="newChat()">＋</button>
+   <button class="tool" title="New group" onclick="newGroup()">👥</button>
+   <button class="tool" title="Settings" onclick="settingsPanel()">⚙</button>
+  </div>
+ </aside>
+ <main class="main">
+  <div id="welcome" class="welcome"><div class="big">💬</div><h2>BUDDIES MESSENGER</h2><p>Your private chat space.<br>Create a chat or select one to begin.</p></div>
+  <div id="chatUI" class="hidden" style="display:flex;flex-direction:column;flex:1;min-height:0">
+   <header class="chat-head">
+    <div class="avatar" id="chatAvatar">B</div>
+    <div class="chat-title"><b id="chatName">Chat</b><small id="chatStatus">Personal chat</small></div>
+    <div class="head-actions">
+     <button class="icon-btn" title="Voice call demo" onclick="callDemo('Voice')">☎</button>
+     <button class="icon-btn" title="Video call demo" onclick="callDemo('Video')">▣</button>
+     <button class="icon-btn" title="Chat options" onclick="chatOptions()">⋮</button>
+    </div>
+   </header>
+   <section class="messages" id="messages"></section>
+   <div class="composer">
+    <button class="tool" title="Emoji" onclick="emojiPanel()">😊</button>
+    <button class="tool" title="Attach file or photo" onclick="document.getElementById('attachment').click()">📎</button>
+    <input type="file" id="attachment" class="hidden" accept="image/*,.pdf,.txt,.doc,.docx" onchange="attachFile(event)">
+    <input id="messageInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMessage()">
+    <button class="send" onclick="sendMessage()">➤</button>
+   </div>
+  </div>
+  <div id="floatingPanel" class="panel hidden"></div>
+ </main>
+</div>
+<div id="modalRoot"></div>
+<script>
+const KEY='buddies_messenger_v1';
+let data=loadData(),activeId=null,currentTab='chats';
+function loadData(){try{return JSON.parse(localStorage.getItem(KEY))||{profile:{name:'My Profile',about:'Hey there! I am using Buddies Messenger.'},chats:[],statuses:[]}}catch(e){return {profile:{name:'My Profile',about:'Hey there!'},chats:[],statuses:[]}}}
+function save(){localStorage.setItem(KEY,JSON.stringify(data))}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function stamp(){return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
+function active(){return data.chats.find(c=>c.id===activeId)}
+function initials(n){return (n||'?').trim().charAt(0).toUpperCase()}
+function switchTab(t){currentTab=t;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));renderList()}
+function renderList(){
+ const box=document.getElementById('list'),q=document.getElementById('search').value.toLowerCase();box.innerHTML='';
+ if(currentTab==='status'){
+  const add=document.createElement('button');add.className='wide';add.textContent='＋ Add my status';add.onclick=addStatus;box.append(add);
+  data.statuses.slice().reverse().forEach(s=>{let d=document.createElement('div');d.className='status-card';d.innerHTML='<b>'+esc(s.name)+'</b><span class="muted">'+esc(s.time)+'</span><p>'+esc(s.text)+'</p>';box.append(d)});return;
+ }
+ let chats=data.chats.filter(c=>(currentTab==='groups'?c.group:!c.group)&&c.name.toLowerCase().includes(q));
+ chats.sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||b.updated-a.updated);
+ if(!chats.length){box.innerHTML='<p class="muted" style="text-align:center;padding:22px">No '+currentTab+' yet.<br>Tap ＋ to create one.</p>';return}
+ chats.forEach(c=>{let d=document.createElement('div');d.className='person'+(c.id===activeId?' active':'');let last=c.messages[c.messages.length-1];d.innerHTML='<div class="avatar">'+(c.photo?'<img src="'+c.photo+'">':esc(initials(c.name)))+'</div><div class="person-info"><div class="person-top"><span class="person-name">'+(c.pinned?'📌 ':'')+esc(c.name)+'</span><span class="person-time">'+(last?esc(last.time):'')+'</span></div><div class="preview">'+(c.archived?'Archived · ':'')+(last?esc(last.text||last.fileName||'Attachment'):'Start a conversation')+'</div></div>';d.onclick=()=>openChat(c.id);box.append(d)});
+}
+function openChat(id){activeId=id;let c=active();if(!c)return;document.getElementById('welcome').classList.add('hidden');document.getElementById('chatUI').classList.remove('hidden');document.getElementById('chatAvatar').textContent=initials(c.name);document.getElementById('chatAvatar').innerHTML=c.photo?'<img src="'+c.photo+'">':esc(initials(c.name));document.getElementById('chatName').textContent=c.name;document.getElementById('chatStatus').textContent=c.group?'Group · '+(c.members||[]).join(', '):'Personal chat';renderMessages();renderList();hidePanel()}
+function renderMessages(){let c=active(),box=document.getElementById('messages');box.innerHTML='';if(!c)return;if(!c.messages.length){box.innerHTML='<div class="welcome"><div class="big">👋</div><p>No messages yet. Say hello!</p></div>';return}c.messages.forEach(m=>{let b=document.createElement('div');b.className='bubble mine';if(m.kind==='image'){b.innerHTML='<img src="'+m.data+'"><span>'+esc(m.text||'')+'</span>'}else if(m.kind==='file'){b.innerHTML='📎 <a download="'+esc(m.fileName)+'" href="'+m.data+'">'+esc(m.fileName)+'</a>'}else b.textContent=m.text;b.innerHTML+= '<span class="stamp">'+esc(m.time)+' ✓✓</span>';box.append(b)});box.scrollTop=box.scrollHeight}
+function sendMessage(){let input=document.getElementById('messageInput'),v=input.value.trim(),c=active();if(!v||!c)return;c.messages.push({kind:'text',text:v,time:stamp()});c.updated=Date.now();input.value='';save();renderMessages();renderList()}
+function newChat(){modal('New chat','<label>Friend name</label><input id="newName" placeholder="Enter name" maxlength="40">','Create',()=>{let n=document.getElementById('newName').value.trim();if(!n)return;let c={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),name:n,group:false,messages:[],updated:Date.now(),pinned:false,archived:false};data.chats.push(c);save();closeModal();switchTab('chats');openChat(c.id)})}
+function newGroup(){modal('Create group','<label>Group name</label><input id="groupName" placeholder="e.g. College Friends"><label>Members (comma separated)</label><input id="groupMembers" placeholder="Aman, Riya, Rahul">','Create group',()=>{let n=document.getElementById('groupName').value.trim();if(!n)return;let members=document.getElementById('groupMembers').value.split(',').map(x=>x.trim()).filter(Boolean);let c={id:String(Date.now()),name:n,group:true,members,messages:[],updated:Date.now(),pinned:false,archived:false};data.chats.push(c);save();closeModal();switchTab('groups');openChat(c.id)})}
+function attachFile(e){let file=e.target.files[0],c=active();if(!file||!c)return;if(file.size>1500000){alert('Demo version: choose a file smaller than 1.5 MB.');e.target.value='';return}let r=new FileReader();r.onload=()=>{let image=file.type.startsWith('image/');c.messages.push({kind:image?'image':'file',data:r.result,fileName:file.name,text:'',time:stamp()});c.updated=Date.now();save();renderMessages();renderList()};r.readAsDataURL(file);e.target.value=''}
+function emojiPanel(){showPanel('<h3>Choose emoji</h3><div class="emoji-row">'+['😀','😂','🥰','😍','😎','😭','🙏','👍','❤️','🔥','🎉','👋','💯','🤝','✨','😇','🤔','🙌','💙','🤣'].map(x=>`<button onclick="insertEmoji('${x}')">${x}</button>`).join('')+'</div>')}
+function insertEmoji(x){let i=document.getElementById('messageInput');i.value+=x;i.focus();hidePanel()}
+function showPanel(html){let p=document.getElementById('floatingPanel');p.innerHTML=html;p.classList.remove('hidden')}
+function hidePanel(){document.getElementById('floatingPanel').classList.add('hidden')}
+function settingsPanel(){showPanel('<h3>Settings</h3><button class="wide" onclick="toggleTheme()">🌗 Switch light / dark theme</button><button class="wide" onclick="profileModal()">☻ Edit profile</button><button class="wide" onclick="exportBackup()">⬇ Export backup</button><button class="wide" onclick="importBackup()">⬆ Import backup</button><p class="muted">Your chats are stored in this browser on this device.</p>')}
+function toggleTheme(){document.body.classList.toggle('light');localStorage.setItem('buddies_theme',document.body.classList.contains('light')?'light':'dark')}
+function profileModal(){modal('Your profile','<label>Your name</label><input id="profileName" value="'+esc(data.profile.name)+'"><label>About</label><textarea id="profileAbout">'+esc(data.profile.about)+'</textarea>','Save profile',()=>{data.profile.name=document.getElementById('profileName').value.trim()||'My Profile';data.profile.about=document.getElementById('profileAbout').value;save();closeModal()})}
+function chatOptions(){let c=active();if(!c)return;showPanel('<h3>'+esc(c.name)+'</h3><button class="wide" onclick="renameChat()">✏ Rename chat</button><button class="wide" onclick="togglePin()">📌 '+(c.pinned?'Unpin':'Pin')+' chat</button><button class="wide" onclick="archiveChat()">📦 '+(c.archived?'Unarchive':'Archive')+' chat</button><button class="wide" onclick="clearChat()">🧹 Clear messages</button><button class="wide" onclick="deleteChat()">🗑 Delete chat</button>')}
+function renameChat(){let c=active(),n=prompt('New chat name',c.name);if(n&&n.trim()){c.name=n.trim();save();openChat(c.id)}}
+function togglePin(){let c=active();c.pinned=!c.pinned;save();openChat(c.id)}
+function archiveChat(){let c=active();c.archived=!c.archived;save();activeId=null;document.getElementById('chatUI').classList.add('hidden');document.getElementById('welcome').classList.remove('hidden');renderList()}
+function clearChat(){if(confirm('Delete all messages in this chat?')){active().messages=[];save();renderMessages();renderList()}hidePanel()}
+function deleteChat(){if(confirm('Delete this chat permanently from this browser?')){data.chats=data.chats.filter(c=>c.id!==activeId);activeId=null;save();document.getElementById('chatUI').classList.add('hidden');document.getElementById('welcome').classList.remove('hidden');renderList()}hidePanel()}
+function addStatus(){modal('Add status','<label>What is on your mind?</label><textarea id="statusText" placeholder="Share an update..." maxlength="250"></textarea>','Post status',()=>{let t=document.getElementById('statusText').value.trim();if(!t)return;data.statuses.push({name:data.profile.name,text:t,time:stamp()});save();closeModal();renderList()})}
+function callDemo(type){alert(type+' call button is a demo only. Real calls need online signaling and a calling server.')}
+function modal(title,body,ok,fn){document.getElementById('modalRoot').innerHTML='<div class="modal-bg" id="modalBg"><div class="modal"><h2>'+title+'</h2>'+body+'<div class="modal-actions"><button class="secondary" onclick="closeModal()">Cancel</button><button class="primary" id="modalOk">'+ok+'</button></div></div></div>';document.getElementById('modalOk').onclick=fn}
+function closeModal(){document.getElementById('modalRoot').innerHTML=''}
+function exportBackup(){let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='buddies-messenger-backup.json';a.click();URL.revokeObjectURL(a.href);hidePanel()}
+function importBackup(){let i=document.createElement('input');i.type='file';i.accept='.json,application/json';i.onchange=()=>{let f=i.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!d.chats||!d.profile)throw Error();data=d;save();renderList();alert('Backup restored!')}catch(e){alert('Invalid backup file')}};r.readAsText(f)};i.click();hidePanel()}
+document.addEventListener('click',e=>{let p=document.getElementById('floatingPanel');if(!p.contains(e.target)&&!e.target.closest('.icon-btn')&&!e.target.closest('.tool'))hidePanel()});
+if(localStorage.getItem('buddies_theme')==='light')document.body.classList.add('light');
+renderList();
+</script>
+</body>
+</html>
